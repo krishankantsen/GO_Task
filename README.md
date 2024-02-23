@@ -35,27 +35,27 @@ This repository demonstrates basic CRUD (Create, Read, Update, Delete) operation
 
 ### 1. Create Task
    ```http
-   POST /createTask
+   POST /tasks
    ```
 
 ### 2. Get All Tasks
    ```http
-   GET /getAllTask
+   GET /tasks
    ```
 
 ### 3. Get Task by ID
    ```http
-   GET /getTask/:id
+   GET /tasks/:id
    ```
 
 ### 4. Update Task by ID
    ```http
-   PUT /updateTask/:id
+   PUT /tasks/:id
    ```
 
 ### 5. Delete Task by ID
    ```http
-   DELETE /deleteTask/:id
+   DELETE /tasks/:id
    ```
 
 ## Usage

@@ -18,13 +18,18 @@ func CreateTask(c *gin.Context) {
 		return
 	}
 
-	_, err := models.Db.Exec("INSERT INTO tasks (title, description, status, duedate) VALUES (?, ?, ?, ?)", task.Title, task.Description, task.Status, task.DueDate)
+	result, err := models.Db.Exec("INSERT INTO tasks (title, description, status, duedate) VALUES (?, ?, ?, ?)", task.Title, task.Description, task.Status, task.DueDate)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Task Created Successfully"})
+	insertedID, _ := result.LastInsertId()
+
+	createdTask := models.Task{ID: int64(insertedID)}
+	models.Db.QueryRow("SELECT * FROM tasks WHERE ID = ?", insertedID).Scan(&createdTask.ID, &createdTask.Title, &createdTask.Description, &createdTask.Status, &createdTask.DueDate)
+
+	c.JSON(http.StatusCreated, gin.H{"createdTask": createdTask, "message": "Task Created Successfully"})
 
 }
 
@@ -102,11 +107,15 @@ func UpdateTask(c *gin.Context) {
 	}
 
 	if rowsAffected == 0 {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unexpected error: no rows affected during update"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Task not found with ID: " + taskId})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Task updated successfully"})
+	// Fetch the updated task from the database
+	var updatedTaskFromDB models.Task
+	models.Db.QueryRow("SELECT * FROM tasks WHERE ID = ?", taskId).Scan(&updatedTaskFromDB.ID, &updatedTaskFromDB.Title, &updatedTaskFromDB.Description, &updatedTaskFromDB.Status, &updatedTaskFromDB.DueDate)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Task updated successfully", "updatedTask": updatedTaskFromDB})
 
 }
 func GetTask(c *gin.Context) {
